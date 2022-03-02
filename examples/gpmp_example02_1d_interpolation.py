@@ -113,6 +113,6 @@ zpv = np.maximum(zpv, 0)  # zeroes negative variances
 
 fig = gp.misc.plotutils.Figure(isinteractive=True)
 fig.plot(xt, zt, 'C2', linewidth=0.5)
-fig.plot(xi, zi, 'rs')
+fig.plotdata(xi, zi)
 fig.plotgp(xt, zpm, zpv)
 fig.show()

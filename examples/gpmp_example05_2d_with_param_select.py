@@ -125,6 +125,8 @@ plt.plot(zt, zpm, 'ko')
 xmin = min(xmin, ymin)
 xmax = max(xmax, ymax)
 plt.plot([xmin, xmax], [xmin, xmax], '--')
+plt.xlabel('true values')
+plt.ylabel('predictions')
 plt.show()
 
 # LOO predictions

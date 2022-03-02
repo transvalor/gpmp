@@ -15,7 +15,7 @@ for p in [0, 1, 4]:
     r = gp.kernel.maternp_kernel(p, np.abs(h))
     fig.plot(h, r, label='p={} / nu={}/2'.format(p, 2*p+1))
 
-fig.ax.set_xlabel('h')
-fig.ax.set_ylabel('$k_{p+1/2}(h)$')
-fig.ax.legend()
+fig.xlabel('h')
+fig.ylabel('$k_{p+1/2}(h)$')
+fig.legend()
 fig.show()
