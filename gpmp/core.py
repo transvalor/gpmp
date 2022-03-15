@@ -217,8 +217,8 @@ class Model:
     def make_ml_criterion(self, xi, zi):
         ''' returns the maximum likelihood criterion and its gradient'''
         nll = jax.jit(lambda covparam: self.negative_log_likelihood(xi, zi, covparam))
-        dnll = jax.grad(negative_log_likelihood)
-        return nlrel, dnlrel
+        dnll = jax.grad(nll)
+        return nll, dnll
 
     def make_reml_criterion(self, xi, zi):
         ''' returns the restricted maximum likelihood criterion and its gradient'''
