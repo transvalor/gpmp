@@ -97,7 +97,7 @@ zpv = np.maximum(zpv, 0)  # zeroes negative variances
 fig = gp.misc.plotutils.Figure(isinteractive=True)
 fig.plot(xt, zt, 'k', linewidth=0.5)
 fig.plotdata(xi, zi)
-fig.plotgp(xt, zpm, zpv)
+fig.plotgp(xt, zpm, zpv, colorscheme='simple')
 fig.xlabel('$x$')
 fig.ylabel('$z$')
 fig.title('Posterior GP with parameters selected by ReML')

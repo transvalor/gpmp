@@ -170,7 +170,7 @@ def hartmann6(x):
         new = alpha[ii] * np.exp(-inner)
         outer = outer + new
 
-    z = -(2.58 + outer) / 1.94
+    z = - outer
 
     return z
 

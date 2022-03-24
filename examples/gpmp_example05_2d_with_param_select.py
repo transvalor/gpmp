@@ -94,7 +94,7 @@ zpv = np.maximum(zpv, 0)  # zeroes negative variances
 
 # contour plot
 cmap = plt.get_cmap('PiYG')
-contour_lines = 40
+contour_lines = 30
 
 fig, axes = plt.subplots(nrows=2, ncols=2)
 
@@ -133,4 +133,4 @@ plt.show()
 zloom, zloov, eloo = model.loo(xi, zi)
 gp.misc.plotutils.plot_loo(zi, zloom, zloov)
 
-gp.misc.plotutils.crosssections(model, xi, zi, box, [0, 20], [0,1])
+gp.misc.plotutils.crosssections(model, xi, zi, box, [0, 20], [0, 1])

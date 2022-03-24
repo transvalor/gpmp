@@ -47,7 +47,7 @@ class Figure:
         self.ax.plot(x, z, *args, **kargs)
 
     def plotdata(self, x, z):
-        self.ax.plot(x, z,'rs', markerfacecolor='none', markersize=8)
+        self.ax.plot(x, z,'rs', markerfacecolor='none', markersize=6)
 
     def xlabel(self, s):
         self.ax.set_xlabel(s)
@@ -86,6 +86,14 @@ class Figure:
             fillcol = [ '#F2F2F2' ]
             alpha = 0.0
             drawulb=True
+        if colorscheme == 'simple':
+            mcol = '#F2404C'
+            mwidth = 2.0
+            delta0 = [ 1.959964 ]
+            fillcol = [ '#BFBFBF' ]
+            alpha = 0.8
+            kwargs['linewidth'] = 0.5
+            drawulb=False
         else:
             mcol = '#F2404C'
             mwidth = 2.0
