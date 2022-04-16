@@ -99,7 +99,8 @@ def randunif(dim, n, box):
     '''random uniform sample in box'''
     sample = np.random.rand(n, dim)
     sample = scale(sample, box)
-
+    
+    return sample
 
 def ldrandunif(dim, n, box):
     '''low discrepancy random uniform sample in box'''
