@@ -71,9 +71,19 @@ pip install jax
 
 Please refer to the examples that illustrate the different features of GPmp.
 
+## Documentation with Sphinx
+The automatic documentation is created using [Sphinx](https://www.sphinx-doc.org/en/master/) and following the python docstrings recommendations from [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
+
+The html theme is taken from
+>pip install pydata_sphinx_theme
+
+In order to generate the intereactive html:
+>cd ./doc
+
+>make html
+
 ## To do
 
-* provide a documentation
 * unit tests
 * improve package setup
 
