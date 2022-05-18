@@ -1,11 +1,9 @@
 #coding: utf-8
-'''Test functions
-
-Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
-Copyright (c) 2022, CentraleSupelec
-License: GPLv3 (see LICENSE)
-
-'''
+## --------------------------------------------------------------
+# Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
+# Copyright (c) 2022, CentraleSupelec
+# License: GPLv3 (see LICENSE)
+## --------------------------------------------------------------
 import math
 import numpy as np
 
@@ -25,14 +23,23 @@ def twobumps(x):
 
 
 def wave(x):
-    '''
-    Computes the Wave function
+    """Computes the Wave function
+    
+    .. math ::
 
-    The Wave function is defined as:
+        f: x & = (x1, x2) \in [-1; 1] x [-1; 1] |-> \\\\
+        & exp(1.8 * (x1 + x2)) + 3 * x1 + 6 * x2.^2 + 3 * sin(4 * pi * x1)
 
-    f: x = (x1, x2) \in [-1; 1] x [-1; 1] |-> 
-         exp(1.8 * (x1 + x2)) + 3 * x1 + 6 * x2.^2 + 3 * sin(4 * pi * x1)
-    '''
+    Parameters
+    ----------
+    x : numpay.array
+        _description_
+
+    Returns
+    -------
+    numpay.array
+        _description_
+    """
     z = np.exp(1.8 * (x[:, 0] + x[:, 1])) \
         + 3 * x[:, 1] \
         + 6 * x[:, 1]**2 \
@@ -42,16 +49,25 @@ def wave(x):
 
 
 def braninhoo(x):
-    '''
-    BRANINHOO computes the Branin-Hoo function.
+    """the Branin-Hoo function
 
-    The Branin-Hoo function (Branin and Hoo, 1972) is a classical test
+    The Branin-Hoo function [1] is a classical test
     function for global optimization algorithms, which belongs to the
-    well-known Dixon-Szego test set (Dixon and Szego, 1978). It is usually
+    well-known Dixon-Szego test set [2]. It is usually
     minimized over [-5; 10] x [0; 15].
 
-    REFERENCES
+    Parameters
+    ----------
+    x : numpy.array
+        _description_
 
+    Returns
+    -------
+    numpy.array
+        _description_
+    
+    References
+    ----------
     [1] Branin, F. H. and Hoo, S. K. (1972), A Method for Finding Multiple
         Extrema of a Function of n Variables, in Numerical methods of
         Nonlinear Optimization (F. A. Lootsma, editor, Academic Press,
@@ -62,7 +78,7 @@ def braninhoo(x):
 
     [3] Surjanovic, S. and Bingham D. (2013), Branin Function,
         https://www.sfu.ca/~ssurjano/Code/braninm.html
-    '''
+    """
 
     a = 5.1 / (4 * math.pi**2)
     b = 5 / math.pi
@@ -75,15 +91,24 @@ def braninhoo(x):
 
 
 def hartmann4(x):
-    '''Hartmann 4-dimensional function [1, 2]
-    
-    Dimensions: 4
-
+    """Hartmann 4-dimensional function [1, 2]
     The 4-dimensional Hartmann is a multimodal function
 
     Input Domain:
     xi ∈ (0, 1), for all i = 1, …, 6.
 
+    Parameters
+    ----------
+    x : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    References
+    ----------
     [1] Dixon, L. C. W., & Szego, G. P. (1978). The global
         optimization problem: an introduction. Towards global
         optimization, 2, 1-15.
@@ -92,13 +117,14 @@ def hartmann4(x):
         of kriging-based infill criteria for noisy optimization.
         Based on https://www.sfu.ca/~ssurjano/hart6.html
 
+    Notes
+    -----
     Authors: Sonja Surjanovic and Derek Bingham, Simon Fraser University
 
     Original copyright notice:
    
     Copyright 2013. Derek Bingham, Simon Fraser University.
-
-    '''
+    """
     alpha = np.array([1.0, 1.2, 3.0, 3.2])
     A = np.array([[10, 3, 17, 3.5, 1.7, 8],
                   [0.05, 10, 17, 0.1, 8, 14],
@@ -126,9 +152,7 @@ def hartmann4(x):
 
 
 def hartmann6(x):
-    '''Hartmann 6-dimensional function [1]
-    
-    Dimensions: 6
+    """Hartmann 6-dimensional function [1]
 
     The 6-dimensional Hartmann function has 6 local minima and a 
     a global minimum f(x*) = -3.32237
@@ -136,19 +160,34 @@ def hartmann6(x):
     Input Domain:
     xi ∈ (0, 1), for all i = 1, …, 6.
 
+    Parameters
+    ----------
+    x : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    References
+    ----------
     [1] Dixon, L. C. W., & Szego, G. P. (1978). The global
         optimization problem: an introduction. Towards global
         optimization, 2, 1-15.
 
-    Based on https://www.sfu.ca/~ssurjano/hart6.html
+    [2] Picheny, V., Wagner, T., & Ginsbourger, D. (2012). A benchmark
+        of kriging-based infill criteria for noisy optimization.
+        Based on https://www.sfu.ca/~ssurjano/hart6.html
 
+    Notes
+    -----
     Authors: Sonja Surjanovic and Derek Bingham, Simon Fraser University
 
     Original copyright notice:
    
     Copyright 2013. Derek Bingham, Simon Fraser University.
-
-    '''
+    """
     alpha = np.array([1.0, 1.2, 3.0, 3.2])
     A = np.array([[10, 3, 17, 3.5, 1.7, 8],
                   [0.05, 10, 17, 0.1, 8, 14],
@@ -176,7 +215,7 @@ def hartmann6(x):
 
 
 def borehole(x):
-    '''Borehole function
+    """Borehole function
 
     Dimensions: 8
 
@@ -215,11 +254,18 @@ def borehole(x):
     such that the natural logarithm of the variable has a N(μ, σ)
     distribution.
 
-    % OUTPUT AND INPUT:
-    %
-    % z  = water flow rate
-    % x  = [rw, r, Tu, Hu, Tl, Hl, L, Kw]
-    
+    Parameters
+    ----------
+    x : _type_
+        [rw, r, Tu, Hu, Tl, Hl, L, Kw]
+
+    Returns
+    -------
+    z : _type_
+        water flow rate
+
+    References
+    ----------
     [1] Harper, W. V., & Gupta, S. K. (1983). Sensitivity/uncertainty
         analysis of a borehole scenario comparing Latin Hypercube
         Sampling and deterministic sensitivity approaches
@@ -227,14 +273,16 @@ def borehole(x):
         (USA). Office of Nuclear Waste Isolation
 
     Based on https://www.sfu.ca/~ssurjano/borehole.html
-
+    
+    Notes
+    -----
     Authors: Sonja Surjanovic and Derek Bingham, Simon Fraser University
 
     Original copyright notice:
    
     Copyright 2013. Derek Bingham, Simon Fraser University.
 
-    '''
+    """
     rw = x[:, 0]
     r = x[:, 1]
     Tu = x[:, 2]
@@ -256,31 +304,43 @@ def borehole(x):
 
 
 def detpep8d(x):
-    '''Dette & Pepelyshev (2010) 8-Dimensional Function
-
+    """Dette & Pepelyshev (2010) 8-Dimensional Function
     Dimensions: 8
 
-    This function [1] is used for the comparison of computer experiment
+    This function is used for the comparison of computer experiment
     designs. It is highly curved in some variables and less in others
-    (Dette & Pepelyshev, 2010).
+    [1].
 
     Input Domain:
 
     The function is evaluated on the hypercube xi ∈ [0, 1], for all i = 1, …, 8.
 
+    Parameters
+    ----------
+    x : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    References
+    ----------
     [1] Dette, H., & Pepelyshev, A. (2010). Generalized Latin
         hypercube design for computer experiments. Technometrics,
         52(4).
 
     Based on https://www.sfu.ca/~ssurjano/detpep108d.html
 
+    Notes
+    -----
     Authors: Sonja Surjanovic and Derek Bingham, Simon Fraser University
 
     Original copyright notice:
    
     Copyright 2013. Derek Bingham, Simon Fraser University.
-
-    '''
+    """
     x1 = x[:, 0]
     x2 = x[:, 1]
     x3 = x[:, 2]

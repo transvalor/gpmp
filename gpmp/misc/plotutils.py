@@ -1,9 +1,8 @@
-''' Visualization functions
-----
-Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
-Copyright (c) 2022, CentraleSupelec
-License: GPLv3 (see LICENSE)
-'''
+## --------------------------------------------------------------
+# Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
+# Copyright (c) 2022, CentraleSupelec
+# License: GPLv3 (see LICENSE)
+## --------------------------------------------------------------
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +10,16 @@ from matplotlib import interactive
 
 
 class Figure:
+    """
+    Figures manager class
 
+    Attributes
+    ----------
+
+    Methods
+    -------
+    
+    """
     def __init__(self, nrows=1, ncols=1, isinteractive=True):
 
         # Check if we run in interpreter mode

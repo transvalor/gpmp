@@ -1,9 +1,8 @@
-'''Helper functions for making common designs
-----
-Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
-Copyright (c) 2022, CentraleSupelec
-License: GPLv3 (see LICENSE)
-'''
+## --------------------------------------------------------------
+# Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
+# Copyright (c) 2022, CentraleSupelec
+# License: GPLv3 (see LICENSE)
+## --------------------------------------------------------------
 import numpy as np
 from scipy.stats import qmc
 from ..kernel import distance
@@ -55,9 +54,7 @@ def scale(sample_standard, box):
 
 
 def regulargrid(dim, n, box):
-    '''Builds a regular grid
-
-    x = regulargrid (dim, n, box)
+    """Builds a regular grid
 
     Builds a regular grid in the DIM-dimensional hyperrectangle 
     \Prod [xmin_i; xmax_i]. 
@@ -71,7 +68,20 @@ def regulargrid(dim, n, box):
     box, which is a 2 x dim array where box_(1, i) and box_(2, i) are
     the lower- and upper-bound of the interval on the i^th coordinate.
 
-    '''
+    Parameters
+    ----------
+    dim : _type_
+        _description_
+    n : _type_
+        _description_
+    box : _type_
+        _description_
+
+    Returns
+    -------
+    x : _type_
+        regulargrid (dim, n, box)
+    """
 
     # Read argument 'n'
     if not isinstance(n, list):
@@ -102,8 +112,26 @@ def randunif(dim, n, box):
 
 
 def ldrandunif(dim, n, box):
-    '''low discrepancy random uniform sample in box'''
-    '''FIXME: optimization method'''
+    """low discrepancy random uniform sample in box
+
+    Parameters
+    ----------
+    dim : int
+        _description_
+    n : int
+        _description_
+    box : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    
+    Notes
+    -----
+    FIXME: optimization method
+    """
     max_iter = 100
     mindiscrepany = 1e6  # large number
     for i in range(max_iter):

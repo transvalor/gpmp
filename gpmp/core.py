@@ -1,32 +1,28 @@
-''' Core functions of the gpmp
-
-Define the class Model with the following methods:
- * kriging_predictor_with_zero_mean
- * kriging_predictor
- * predict
- * loo_with_zero_mean
- * loo
- * negative_log_likelihood
- * negative_log_restricted_likelihood
- * make_ml_criterion
- * make_reml_criterion
- * norm_k_sqrd_with_zero_mean
- * norm_k_sqrd
- * sample_paths
- * conditional_sample_paths
-
-----
-Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
-Copyright (c) 2022, CentraleSupelec
-License: GPLv3 (see LICENSE)
-'''
+## --------------------------------------------------------------
+# Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
+# Copyright (c) 2022, CentraleSupelec
+# License: GPLv3 (see LICENSE)
+## --------------------------------------------------------------
 import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as linalg
 
 
 class Model:
+    """
+    Model manager class
 
+    Attributes
+    ----------
+    mean : 
+    covariance : 
+    meanparam : 
+    covparam :
+
+    Methods
+    -------
+    
+    """
     def __init__(self, mean, covariance, meanparam=None, covparam=None):
         self.mean = mean
         self.covariance = covariance
@@ -77,26 +73,32 @@ class Model:
         return lambda_t, zt_posterior_variance
         
     def predict(self, xi, zi, xt, return_lambdas=False):
-        '''Performs a prediction at target points xt given the data (xi, zi).
+        """Performs a prediction at target points xt given the data (xi, zi).
 
-        Args:
-            * xi must be a 2d ndarray with size ni x dim,
-            * zi must be a 2d ndarray with size ni x 1,
-            * xt must be a 2d ndarray with size nt x dim,
-            where ni is the number of observations and nt the number
-            of prediction points.
+        Parameters
+        ----------
+        xi : ndarray(ni,dim)
+            _description_
+        zi : ndarray(ni,1)
+            _description_
+        xt : ndarray(nt,dim)
+            _description_
+        return_lambdas : bool, optional
+            Set return_lambdas=True if lambdas should be returned, by default False
 
-            Set return_lambdas=True if lambdas should be returned
-
-        Returns:
-            z_posterior_mean and z_posterior variance, which are 2d arrays
-            of shape nt x 1
-
-            From a Bayesian point of view, the outputs are
-            respectively the posterior mean and variance of the
-            Gaussian process given the data (xi, zi).
-
-        '''
+        Returns
+        -------
+        z_posterior_mean : ndarray
+            2d array of shape nt x 1
+        z_posterior variance : ndarray
+            2d array of shape nt x 1
+        
+        Notes
+        -----
+        From a Bayesian point of view, the outputs are
+        respectively the posterior mean and variance of the
+        Gaussian process given the data (xi, zi).
+        """
 
         if self.mean is None:
             lambda_t, zt_posterior_variance = self.kriging_predictor_with_zero_mean(xi, xt)
@@ -168,7 +170,22 @@ class Model:
         return zloo, sigma2loo, eloo
 
     def negative_log_likelihood(self, xi, zi, covparam):
-        ''' Computes the negative log-likelihood of the model'''
+        """Computes the negative log-likelihood of the model
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+        covparam : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         K = self.covariance(xi, xi, covparam)
         n = K.shape[0]
 
@@ -183,7 +200,22 @@ class Model:
         return L
     
     def negative_log_restricted_likelihood(self, xi, zi, covparam):
-        ''' Computes the negative log- restricted likelihood of the model'''
+        """Computes the negative log- restricted likelihood of the model
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+        covparam : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         K = self.covariance(xi, xi, covparam)
         P = self.mean(xi, self.meanparam)
         Pshape = P.shape
@@ -214,19 +246,64 @@ class Model:
         return L
 
     def make_ml_criterion(self, xi, zi):
-        ''' returns the maximum likelihood criterion and its gradient'''
+        """maximum likelihood criterion
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            maximum likelihood criterion
+        _type_
+            maximum likelihood criterion's gradient
+        """
         nll = jax.jit(lambda covparam: self.negative_log_likelihood(xi, zi, covparam))
         dnll = jax.grad(negative_log_likelihood)
         return nlrel, dnlrel
 
     def make_reml_criterion(self, xi, zi):
-        ''' returns the restricted maximum likelihood criterion and its gradient'''
+        """restricted maximum likelihood criterion
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            restricted maximum likelihood criterion
+        _type_
+            restricted maximum likelihood criterion's gradient
+        """
         nlrel = jax.jit(lambda covparam: self.negative_log_restricted_likelihood(xi, zi, covparam))
         dnlrel = jax.grad(nlrel)
         return nlrel, dnlrel
 
     def norm_k_sqrd_with_zero_mean(self, xi, zi, covparam):
-        ''' returns z' K^-1 z'''
+        """
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+        covparam : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            z' K^-1 z
+        """
         K = self.covariance(xi, xi, covparam)
         C, lower = linalg.cho_factor(K)
         Kinv_zi = linalg.cho_solve((C, lower), zi)
@@ -234,7 +311,22 @@ class Model:
         return norm_sqrd
 
     def norm_k_sqrd(self, xi, zi, covparam):
-        ''' computes (Wz)' (WKW)^-1 Wz where W is a matrix of contrasts'''
+        """
+
+        Parameters
+        ----------
+        xi : _type_
+            _description_
+        zi : _type_
+            _description_
+        covparam : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            (Wz)' (WKW)^-1 Wz where W is a matrix of contrasts
+        """
         K = self.covariance(xi, xi, covparam)
         P = self.mean(xi, self.meanparam)
         n, q = P.shape
@@ -259,7 +351,20 @@ class Model:
         return norm_sqrd
 
     def sample_paths(self, xt, nb_paths):
-        ''' Generates m sample paths on xt'''
+        """Generates m sample paths on xt
+
+        Parameters
+        ----------
+        xt : _type_
+            _description_
+        nb_paths : int
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         K = self.covariance(xt, xt, self.covparam)
 
         # Cholesky factorization of the covariance matrix
@@ -278,7 +383,26 @@ class Model:
                                  zi,
                                  xi_ind,
                                  noisesim=None):
-        ''' Generates m conditional sample paths on xt'''
+        """Generates m conditional sample paths on xt
+
+        Parameters
+        ----------
+        ztsim : _type_
+            _description_
+        lambda_t : _type_
+            _description_
+        zi : _type_
+            _description_
+        xi_ind : _type_
+            _description_
+        noisesim : bool, optional
+            _description_, by default None
+
+        Returns
+        -------
+        ztsimc : _type_
+            _description_
+        """
 
         # dealing with noisy observations?
         noisy = False if noisesim is None else True

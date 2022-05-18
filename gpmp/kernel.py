@@ -1,10 +1,8 @@
-''' Helper functions for defining covariance functions in the gpmp
-
-----
-Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
-Copyright (c) 2022, CentraleSupelec
-License: GPLv3 (see LICENSE)
-'''
+## --------------------------------------------------------------
+# Author: Emmanuel Vazquez <emmanuel.vazquez@centralesupelec.fr>
+# Copyright (c) 2022, CentraleSupelec
+# License: GPLv3 (see LICENSE)
+## --------------------------------------------------------------
 from functools import partial
 import numpy as np
 import jax
@@ -17,30 +15,49 @@ from math import exp, sqrt
 
 
 def scale(x, invrho):
-    ''' Scale x'''
+    """...
+
+    Parameters
+    ----------
+    x : float
+        ...
+    invrho : float
+        ...
+
+    Returns
+    -------
+    float
+        ...
+    """
     return invrho * x
 
 
 @jax.jit
 def distance(x, y, alpha=1e-8):
-    '''Compute a distance matrix
+    """Compute a distance matrix
 
-    Inputs
-      * x: numpy array n x dim
-      * y: numpy array m x dim or None
-      * alpha: a small number to prevent auto-differentation problems
-        with the derivative of sqrt at zero
+    Parameters
+    ----------
+    x : numpy.array(n,dim)
+        _description_
+    y : numpy.array(m,dim)
+        If y is None, it is assumed y is x, by default None
+    alpha : float, optional
+        a small number to prevent auto-differentation problems
+        with the derivative of sqrt at zero, by default 1e-8
 
-    If y is None, it is assumed y is x
-
-    NB: in practice however, it seems that it makes no performance
+    Returns
+    -------
+    numpy.array(n,m)
+        distance matrix such that
+    .. math:: d_{i,j} = (alpha + sum_{k=1}^dim (x_{i,k} - y_{i,k})^2)^(1/2)
+    
+    Notes
+    -----
+    in practice however, it seems that it makes no performance
     improvement; FIXME: investigate memory and CPU usage
 
-    Output
-      * distance matrix d of size n x m such that
-        d_{i,j} = (alpha + sum_{k=1}^dim (x_{i,k} - y_{i,k})^2)^(1/2)
-
-    '''
+    """
     if y is None:
         y = x
 
@@ -63,12 +80,34 @@ def distance(x, y, alpha=1e-8):
 
 
 def exponential_kernel(h):
-    ''' exponential kernel'''
+    """exponential kernel
+
+    Parameters
+    ----------
+    h : numpy.array
+        _description_
+
+    Returns
+    -------
+    numpy.array
+        _description_
+    """
     return jnp.exp(-h)
 
 
 def matern32_kernel(h):
-    ''' Matérn 3/2 kernel'''
+    """Matérn 3/2 kernel
+
+    Parameters
+    ----------
+    h : numpy.array
+        _description_
+
+    Returns
+    -------
+    numpy.array
+        _description_
+    """
     nu = 3 / 2
     c = 2 * sqrt(nu)
     t = c * h
@@ -77,6 +116,20 @@ def matern32_kernel(h):
 
 
 def maternp_kernel(p, h):
+    """Matérn kernel with half-integer regularity nu = p + 1/2
+
+    Parameters
+    ----------
+    p : int
+        _description_
+    h : numpy.array
+        _description_
+
+    Returns
+    -------
+    numpy.array
+        _description_
+    """
     ''' Matérn kernel with half-integer regularity nu = p + 1/2'''
     c = 2 * jnp.sqrt(p + 1 / 2)
     polynomial = 0
@@ -89,19 +142,29 @@ def maternp_kernel(p, h):
 
 @partial(jax.jit, static_argnums=2)
 def maternp_covariance(x, y, p, param):
-    '''Matérn covariance function with half-integer regularity nu = p + 1/2
+    """Matérn covariance function with half-integer regularity nu = p + 1/2
 
-    * parameters
-      - x : ndarray nx x dim
-      - y : ndarray ny x dim
-      - p : integer
-      - param : [log(sigma2) log(1/rho_1) log(1/rho_2) ...]
+    Parameters
+    ----------
+    x : ndarray nx x dim
+        _description_
+    y : ndarray ny x dim
+        _description_
+    p : int
+        _description_
+    param : float
+        [log(sigma2) log(1/rho_1) log(1/rho_2) ...]
 
-    NB: an isotropic covariance is obtained if param = [log(sigma2) log(1/rho)]
+    Returns
+    -------
+    float
+        covariance matrix (nx , ny)
+    
+    Notes
+    -----
+    an isotropic covariance is obtained if param = [log(sigma2) log(1/rho)]
     (only one length scale parameter)
-
-    * output : covariance matrix nx x ny
-    '''
+    """
     sigma2 = jnp.exp(param[0])
     invrho = jnp.exp(param[1:])
     nugget = 10 * jnp.finfo(jnp.float64).eps
@@ -123,12 +186,28 @@ def maternp_covariance(x, y, p, param):
 
 
 def anisotropic_parameters_initial_guess_with_zero_mean(model, xi, zi):
-    '''initialization strategy based on
-       Basak, S., Petit, S., Bect, J., & Vazquez, E. (2021).
+    """anisotropic initialization strategy with zero mean
+
+    Parameters
+    ----------
+    model : _type_
+        _description_
+    xi : _type_
+        _description_
+    zi : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    
+    References
+    ----------
+    .. [1] Basak, S., Petit, S., Bect, J., & Vazquez, E. (2021).
        Numerical issues in maximum likelihood parameter estimation for
        Gaussian process interpolation. arXiv:2101.09747.
-
-    '''
+    """
     rho = jnp.std(xi, axis=0)
     covparam = jnp.concatenate((jnp.array([jnp.log(1.0)]), -jnp.log(rho)))
     n = xi.shape[0]
@@ -137,12 +216,28 @@ def anisotropic_parameters_initial_guess_with_zero_mean(model, xi, zi):
     return jnp.concatenate((jnp.array([jnp.log(sigma2_GLS)]), -jnp.log(rho)))
 
 def anisotropic_parameters_initial_guess(model, xi, zi):
-    '''initialization strategy based on
-       Basak, S., Petit, S., Bect, J., & Vazquez, E. (2021).
+    """anisotropic initialization strategy
+
+    Parameters
+    ----------
+    model : _type_
+        _description_
+    xi : _type_
+        _description_
+    zi : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    References
+    ----------
+    [1] Basak, S., Petit, S., Bect, J., & Vazquez, E. (2021).
        Numerical issues in maximum likelihood parameter estimation for
        Gaussian process interpolation. arXiv:2101.09747.
-
-    '''
+    """
     rho = jnp.std(xi, axis=0)
     covparam = jnp.concatenate((jnp.array([jnp.log(1.0)]), -jnp.log(rho)))
     n = xi.shape[0]
@@ -152,7 +247,22 @@ def anisotropic_parameters_initial_guess(model, xi, zi):
 
 
 def autoselect_parameters(p0, criterion, gradient):
+    """Automatic parameters selection
 
+    Parameters
+    ----------
+    p0 : _type_
+        _description_
+    criterion : _type_
+        _description_
+    gradient : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     # scipy.optimize.minimize cannot use jax arrays
     if isinstance(p0, jax.numpy.ndarray):
         p0 = jnp.asarray(p0)
