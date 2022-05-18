@@ -10,4 +10,5 @@ Content
     :maxdepth: 2
 
     core
-    misc
+    kernel
+    misc/index

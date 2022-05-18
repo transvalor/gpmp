@@ -1,13 +1,8 @@
 ========================
-Core functions
+Core API
 ========================
 
 Core
 =====
 .. automodule:: gpmp.core
-   :members:
-
-Kernel
-=======
-.. automodule:: gpmp.kernel
    :members:
