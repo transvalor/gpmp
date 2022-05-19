@@ -23,7 +23,6 @@ import numpy as np
 import jax.numpy as jnp
 import gpmp as gp
 
-
 #-- dataset
 
 
@@ -42,15 +41,16 @@ def generate_data(noise_std):
     xt = gp.misc.designs.regulargrid(dim, nt, box)
     zt = gp.misc.testfunctions.twobumps(xt)
 
-    # ind = np.arange(nt)
+    # ind = np.arange(nt) 
     # np.random.shuffle(ind)
     # ni = 5
     # ind = ind[0:ni]
-    ind = [10, 45, 100, 130, 160]
+    ind = [10, 45, 100, 130, 130, 130, 131, 132, 133, 133, 133, 134, 160]
     xi = xt[ind]
-    zi = zt[ind] + noise_std * np.random.randn(5)
+    zi = zt[ind] + noise_std * np.random.randn(len(ind))
 
     return xt, zt, xi, zi
+
 
 noise_std = 1e-1
 xt, zt, xi, zi = generate_data(noise_std)
@@ -69,30 +69,39 @@ def constant_mean(x, param):
 mean = constant_mean
 
 
-def kernel(x, y, param):
+def kernel(x, y, param, pairwise=False):
 
     p = 2
     sigma2 = jnp.exp(param[0])
     invrho = jnp.exp(param[1])
     noise_variance = jnp.exp(param[2])
 
-    xs = gp.kernel.scale(x, invrho)
-    if y is x:
-        K = gp.kernel.distance(xs, xs)
-        K = sigma2 * gp.kernel.maternp_kernel(p, K) \
-            + noise_variance * jnp.eye(K.shape[0])
+    if y is x or y is None:
+        if pairwise:
+            K = sigma2 * jnp.ones((x.shape[0], ))  # nx x 0
+        else:
+            xs = gp.kernel.scale(x, invrho)
+            K = gp.kernel.distance(xs, xs)  # nx x nx
+            K = sigma2 * gp.kernel.maternp_kernel(p, K) \
+                + noise_variance * jnp.eye(K.shape[0])
     else:
+        xs = gp.kernel.scale(x, invrho)
         ys = gp.kernel.scale(y, invrho)
-        K = gp.kernel.distance(xs, ys)
+        if pairwise:
+            K = gp.kernel.distance_pairwise(xs, ys)  # nx x 0
+        else:
+            K = gp.kernel.distance(xs, ys)  # nx x ny
+            
         K = sigma2 * gp.kernel.maternp_kernel(p, K)
 
     return K
 
 
 meanparam = None
-covparam = jnp.array([math.log(0.5**2),        # log(sigma2)
-                      math.log(1 / .7),        # log(1/rho)
-                      2*math.log(noise_std)])  # log(noise_variance)
+covparam = jnp.array([
+    math.log(0.5**2),  # log(sigma2)
+    math.log(1 / .7),  # log(1/rho)
+    2 * math.log(noise_std)])  # log(noise_variance)
 model = gp.core.Model(mean, kernel, meanparam, covparam)
 
 #-- prediction

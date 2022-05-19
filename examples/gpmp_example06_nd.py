@@ -72,9 +72,9 @@ def constant_mean(x, param):
     return np.ones((x.shape[0], 1))
 
 
-def kernel(x, y, covparam):
+def kernel(x, y, covparam, pairwise=False):
     p = 10
-    return gp.kernel.maternp_covariance(x, y, p, covparam)
+    return gp.kernel.maternp_covariance(x, y, p, covparam, pairwise)
 
 
 model = gp.core.Model(constant_mean, kernel)

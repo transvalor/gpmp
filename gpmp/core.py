@@ -47,7 +47,8 @@ class Model:
         Kit = self.covariance(xi, xt, self.covparam)
         lambda_t = linalg.solve(Kii, Kit, sym_pos=True, overwrite_a=True, overwrite_b=True)
 
-        zt_posterior_variance = Kii[0, 0] - jnp.einsum('i..., i...', lambda_t, Kit)
+        zt_prior_variance = self.covariance(xt, None, self.covparam, pairwise=True)
+        zt_posterior_variance = zt_prior_variance - jnp.einsum('i..., i...', lambda_t, Kit)
 
         return lambda_t, zt_posterior_variance
 
@@ -72,7 +73,8 @@ class Model:
 
         lambda_t = lambdamu_t[0:ni, :]
 
-        zt_posterior_variance = LHS[0, 0] - jnp.einsum('i..., i...', lambdamu_t, RHS)
+        zt_prior_variance = self.covariance(xt, None, self.covparam, pairwise=True)
+        zt_posterior_variance = zt_prior_variance - jnp.einsum('i..., i...', lambdamu_t, RHS)
 
         return lambda_t, zt_posterior_variance
         
