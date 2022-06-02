@@ -77,21 +77,29 @@ def constant_mean(x, param):
 mean = constant_mean
 
 
-def kernel(x, y, param):
+def kernel(x, y, param, pairwise=False):
 
     p = 2
     sigma2 = jnp.exp(param[0])
     invrho = jnp.exp(param[1])
     nugget = 100 * gp.eps
 
-    xs = gp.kernel.scale(x, invrho)
-    if y is x:
-        K = gp.kernel.distance(xs, xs)
-        K = sigma2 * gp.kernel.maternp_kernel(p, K) \
-            + nugget * jnp.eye(K.shape[0])
+    if y is x or y is None:
+        if pairwise:
+            K = sigma2 * jnp.ones((x.shape[0], ))  # nx x 0
+        else:
+            xs = gp.kernel.scale(x, invrho)
+            K = gp.kernel.distance(xs, xs)  # nx x nx
+            K = sigma2 * gp.kernel.maternp_kernel(p, K) \
+                + nugget * jnp.eye(K.shape[0])
     else:
+        xs = gp.kernel.scale(x, invrho)
         ys = gp.kernel.scale(y, invrho)
-        K = gp.kernel.distance(xs, ys)
+        if pairwise:
+            K = gp.kernel.distance_pairwise(xs, ys) # nx x 0
+        else:
+            K = gp.kernel.distance(xs, ys)  # nx x ny
+            
         K = sigma2 * gp.kernel.maternp_kernel(p, K)
 
     return K
@@ -112,7 +120,7 @@ zpv = np.maximum(zpv, 0)  # zeroes negative variances
 #-- visualization
 
 fig = gp.misc.plotutils.Figure(isinteractive=True)
-fig.plot(xt, zt, 'C2', linewidth=0.5)
-fig.plot(xi, zi, 'rs')
+fig.plot(xt, zt, 'C0', linewidth=0.5)
+fig.plotdata(xi, zi)
 fig.plotgp(xt, zpm, zpv)
 fig.show()

@@ -13,14 +13,15 @@ class Figure:
     """
     Figures manager class
 
-    Attributes
+	Attributes
     ----------
 
     Methods
     -------
     
     """
-    def __init__(self, nrows=1, ncols=1, isinteractive=True):
+
+    def __init__(self, nrows=1, ncols=1, isinteractive=True, **kargs):
 
         # Check if we run in interpreter mode
         # https://stackoverflow.com/questions/2356399/tell-if-python-is-in-interactive-mode
@@ -36,7 +37,7 @@ class Figure:
         if isinteractive & self.interpreter:
             interactive(True)
 
-        self.fig = plt.figure()
+        self.fig = plt.figure(**kargs)
 
         self.nrows = nrows
         self.ncols = ncols
@@ -54,31 +55,68 @@ class Figure:
     def plot(self, x, z, *args, **kargs):
         self.ax.plot(x, z, *args, **kargs)
 
+    def plotdata(self, x, z):
+        self.ax.plot(x, z,'rs', markerfacecolor='none', markersize=6)
+
+    def xlabel(self, s):
+        self.ax.set_xlabel(s)
+
+    def ylabel(self, s):
+        self.ax.set_ylabel(s)
+
+    def title(self, s):
+        self.ax.set_title(s)
+
+    def legend(self):
+        self.ax.legend()
+
     def plotgp(self,
                x,
                mean,
                variance,
-               mcol='#F2404C',
-               edgecol='#3300FF',
+               colorscheme='default',
                ax=None,
                fignum=None,
                **kwargs):
         mean = mean.flatten()
         x = x.flatten()
 
-        # mean
-        self.ax.plot(x, mean, mcol)
         ''' coverage intervals
-        norminv (1 - 0.05/2)  = 1.959964
-        norminv (1 - 0.01/2)  = 2.575829
-        norminv (1 - 0.001/2) = 3.290527
+           norminv (1 - 0.05/2)  = 1.959964
+           norminv (1 - 0.01/2)  = 2.575829
+           norminv (1 - 0.001/2) = 3.290527
         '''
-        delta0 = (3.290527, 2.575829, 1.959964)
-        fillcol = ('#F2F2F2', '#D8D8D8', '#BFBFBF')
-        alpha = 0.8
-        kwargs['linewidth'] = 0.5
+        
+        if colorscheme == 'bw':
+            mcol = '#000000'
+            mwidth = 2.0
+            edgecol='#000000'
+            delta0 = [ 1.959964 ]
+            fillcol = [ '#F2F2F2' ]
+            alpha = 0.0
+            drawulb=True
+        if colorscheme == 'simple':
+            mcol = '#F2404C'
+            mwidth = 2.0
+            delta0 = [ 1.959964 ]
+            fillcol = [ '#BFBFBF' ]
+            alpha = 0.8
+            kwargs['linewidth'] = 0.5
+            drawulb=False
+        else:
+            mcol = '#F2404C'
+            mwidth = 2.0
+            delta0 = [ 3.290527, 2.575829, 1.959964 ]
+            fillcol = [ '#F2F2F2', '#D8D8D8', '#BFBFBF' ]
+            alpha = 0.8
+            kwargs['linewidth'] = 0.5
+            drawulb=False
 
-        for i in range(3):
+            
+        # mean
+        self.ax.plot(x, mean, mcol, linewidth=mwidth)
+            
+        for i in range(len(delta0)):
             kwargs['alpha'] = alpha
 
             lower = mean - delta0[i] * np.sqrt(variance.flatten())
@@ -89,8 +127,9 @@ class Figure:
                          color=fillcol[i],
                          **kwargs)
 
-            # self.ax.plot(x, upper, color=edgecol, linewidth=0.2)
-            # self.ax.plot(x, lower, color=edgecol, linewidth=0.2)
+            if drawulb:
+                self.ax.plot(x, upper, color=edgecol, linestyle='dashed', dashes=(10, 8), linewidth=0.5)
+                self.ax.plot(x, lower, color=edgecol, linestyle='dashed', dashes=(10, 8), linewidth=0.5)
 
 
 def crosssections(model, xi, zi, box, ind_i, ind_dim, nt=100):

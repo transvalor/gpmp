@@ -43,7 +43,8 @@ class Model:
         Kit = self.covariance(xi, xt, self.covparam)
         lambda_t = linalg.solve(Kii, Kit, sym_pos=True, overwrite_a=True, overwrite_b=True)
 
-        zt_posterior_variance = Kii[0, 0] - jnp.einsum('i..., i...', lambda_t, Kit)
+        zt_prior_variance = self.covariance(xt, None, self.covparam, pairwise=True)
+        zt_posterior_variance = zt_prior_variance - jnp.einsum('i..., i...', lambda_t, Kit)
 
         return lambda_t, zt_posterior_variance
 
@@ -68,7 +69,8 @@ class Model:
 
         lambda_t = lambdamu_t[0:ni, :]
 
-        zt_posterior_variance = LHS[0, 0] - jnp.einsum('i..., i...', lambdamu_t, RHS)
+        zt_prior_variance = self.covariance(xt, None, self.covparam, pairwise=True)
+        zt_posterior_variance = zt_prior_variance - jnp.einsum('i..., i...', lambdamu_t, RHS)
 
         return lambda_t, zt_posterior_variance
         
@@ -106,7 +108,7 @@ class Model:
             lambda_t, zt_posterior_variance = self.kriging_predictor(xi, xt)
         
         # posterior mean
-        zt_posterior_mean = jnp.einsum('i...,i...', lambda_t, zi)
+        zt_posterior_mean = jnp.einsum('i..., i...', lambda_t, zi)
 
         # outputs
         if not return_lambdas:
@@ -193,11 +195,11 @@ class Model:
 
         ldetK = 2 * jnp.sum(jnp.log(jnp.diag(C)))
         Kinv_zi = linalg.cho_solve((C, lower), zi)
-        norm2 = jnp.inner(zi, Kinv_zi)
+        norm2 = jnp.einsum('i..., i...', zi, Kinv_zi)
 
         L = 1 / 2 * (n * jnp.log(2 * jnp.pi) + ldetK + norm2)
 
-        return L
+        return L.reshape(())
     
     def negative_log_restricted_likelihood(self, xi, zi, covparam):
         """Computes the negative log- restricted likelihood of the model
@@ -239,11 +241,11 @@ class Model:
 
         # Compute norm2 = (W' zi)' * G^(-1) * (W' zi)
         WKWinv_Wzi = linalg.cho_solve((C, lower), Wzi)
-        norm2 = jnp.inner(Wzi, WKWinv_Wzi)
+        norm2 = jnp.einsum('i..., i...', Wzi, WKWinv_Wzi)
 
         L = 1 / 2 * ((n - q) * jnp.log(2 * jnp.pi) + ldetWKW + norm2)
         
-        return L
+        return L.reshape(())
 
     def make_ml_criterion(self, xi, zi):
         """maximum likelihood criterion
@@ -263,8 +265,8 @@ class Model:
             maximum likelihood criterion's gradient
         """
         nll = jax.jit(lambda covparam: self.negative_log_likelihood(xi, zi, covparam))
-        dnll = jax.grad(negative_log_likelihood)
-        return nlrel, dnlrel
+        dnll = jax.grad(nll)
+        return nll, dnll
 
     def make_reml_criterion(self, xi, zi):
         """restricted maximum likelihood criterion
@@ -285,6 +287,7 @@ class Model:
         """
         nlrel = jax.jit(lambda covparam: self.negative_log_restricted_likelihood(xi, zi, covparam))
         dnlrel = jax.grad(nlrel)
+
         return nlrel, dnlrel
 
     def norm_k_sqrd_with_zero_mean(self, xi, zi, covparam):
@@ -307,7 +310,7 @@ class Model:
         K = self.covariance(xi, xi, covparam)
         C, lower = linalg.cho_factor(K)
         Kinv_zi = linalg.cho_solve((C, lower), zi)
-        norm_sqrd = jnp.inner(zi, Kinv_zi)
+        norm_sqrd = jnp.einsum('i..., i...', zi, Kinv_zi)
         return norm_sqrd
 
     def norm_k_sqrd(self, xi, zi, covparam):
@@ -346,7 +349,7 @@ class Model:
 
         # Compute norm_2 = (W' zi)' * G^(-1) * (W' zi)
         WKWinv_Wzi = linalg.cho_solve((C, lower), Wzi)
-        norm_sqrd = jnp.inner(Wzi, WKWinv_Wzi)
+        norm_sqrd = jnp.einsum('i..., i...', Wzi, WKWinv_Wzi)
 
         return norm_sqrd
 

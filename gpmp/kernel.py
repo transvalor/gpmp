@@ -65,13 +65,40 @@ def distance(x, y, alpha=1e-8):
 
     # Debug: check if x is y
     # print("&x = {}, &y = {}".format(hex(id(x)), hex(id(y))))
-    
+
     if x is y:
         d = jnp.sqrt(alpha + jnp.reshape(y2, [-1, 1]) + y2 -
                      2 * jnp.inner(x, y))
     else:
         x2 = jnp.reshape(jnp.sum(x**2, axis=1), [-1, 1])
         d = jnp.sqrt(alpha + x2 + y2 - 2 * jnp.inner(x, y))
+
+    return d
+
+
+@jax.jit
+def distance_pairwise(x, y, alpha=1e-8):
+    '''Compute a distance vector between the pairs (xi, yi)
+
+    Inputs
+      * x: numpy array n x dim
+      * y: numpy array n x dim or None
+      * alpha: a small number to prevent auto-differentation problems
+        with the derivative of sqrt at zero
+
+    If y is None, it is assumed y is x
+
+    Output
+      * distance vector of size n x 1 such that
+        d_i = (alpha + sum_{k=1}^dim (x_{i,k} - y_{i,k})^2)^(1/2)
+        or
+        d_i = 0 if y is x or None
+
+    '''
+    if x is y or y is None:
+        d = jnp.zeros((x.shape[0], ))
+    else:
+        d = jnp.sqrt(alpha + jnp.sum((x - y)**2, axis=1))
 
     return d
 
@@ -115,6 +142,7 @@ def matern32_kernel(h):
     return (1 + t) * jnp.exp(-t)
 
 
+@partial(jax.jit, static_argnums=0)
 def maternp_kernel(p, h):
     """Matérn kernel with half-integer regularity nu = p + 1/2
 
@@ -140,8 +168,7 @@ def maternp_kernel(p, h):
     return jnp.exp(-c * h) * polynomial
 
 
-@partial(jax.jit, static_argnums=2)
-def maternp_covariance(x, y, p, param):
+def maternp_covariance(x, y, p, param, pairwise=False):
     """Matérn covariance function with half-integer regularity nu = p + 1/2
 
     Parameters
@@ -169,14 +196,21 @@ def maternp_covariance(x, y, p, param):
     invrho = jnp.exp(param[1:])
     nugget = 10 * jnp.finfo(jnp.float64).eps
 
-    xs = scale(x, invrho)
-
-    if y is x:
-        K = distance(xs, xs)
-        K = sigma2 * maternp_kernel(p, K) + nugget * jnp.eye(K.shape[0])
+    if y is x or y is None:
+        if pairwise:
+            K = sigma2 * jnp.ones((x.shape[0], ))  # nx x 0
+        else:
+            xs = scale(x, invrho)
+            K = distance(xs, xs)  # nx x nx
+            K = sigma2 * maternp_kernel(p, K) + nugget * jnp.eye(K.shape[0])
     else:
+        xs = scale(x, invrho)
         ys = scale(y, invrho)
-        K = distance(xs, ys)
+        if pairwise:
+            K = distance_pairwise(xs, ys)  # nx x 0
+        else:
+            K = distance(xs, ys)  # nx x ny
+
         K = sigma2 * maternp_kernel(p, K)
 
     return K
@@ -214,6 +248,7 @@ def anisotropic_parameters_initial_guess_with_zero_mean(model, xi, zi):
     sigma2_GLS = 1 / n * model.norm_k_sqrd_with_zero_mean(xi, zi, covparam)
 
     return jnp.concatenate((jnp.array([jnp.log(sigma2_GLS)]), -jnp.log(rho)))
+
 
 def anisotropic_parameters_initial_guess(model, xi, zi):
     """anisotropic initialization strategy

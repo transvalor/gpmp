@@ -29,9 +29,9 @@ xt, zt, xi, zi, xi_ind = generate_data()
 # model specification
 
 
-def kernel(x, y, covparam):
+def kernel(x, y, covparamm, pairwise=False):
     p = 1
-    return gp.kernel.maternp_covariance(x, y, p, covparam)
+    return gp.kernel.maternp_covariance(x, y, p, covparam, pairwise)
 
 
 def constant_mean(x, param):

@@ -63,9 +63,9 @@ def constant_mean(x, param):
     return np.ones((x.shape[0], 1))
 
 
-def kernel(x, y, covparam):
+def kernel(x, y, covparam, pairwise=False):
     p = 6
-    return gp.kernel.maternp_covariance(x, y, p, covparam)
+    return gp.kernel.maternp_covariance(x, y, p, covparam, pairwise)
 
 
 meanparam = None
@@ -94,7 +94,7 @@ zpv = np.maximum(zpv, 0)  # zeroes negative variances
 
 # contour plot
 cmap = plt.get_cmap('PiYG')
-contour_lines = 40
+contour_lines = 30
 
 fig, axes = plt.subplots(nrows=2, ncols=2)
 
@@ -125,10 +125,12 @@ plt.plot(zt, zpm, 'ko')
 xmin = min(xmin, ymin)
 xmax = max(xmax, ymax)
 plt.plot([xmin, xmax], [xmin, xmax], '--')
+plt.xlabel('true values')
+plt.ylabel('predictions')
 plt.show()
 
 # LOO predictions
 zloom, zloov, eloo = model.loo(xi, zi)
 gp.misc.plotutils.plot_loo(zi, zloom, zloov)
 
-gp.misc.plotutils.crosssections(model, xi, zi, box, [0, 20], [0,1])
+gp.misc.plotutils.crosssections(model, xi, zi, box, [0, 20], [0, 1])

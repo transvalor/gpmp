@@ -25,10 +25,11 @@ def generate_data():
     xt = gp.misc.designs.regulargrid(dim, nt, box)
     zt = gp.misc.testfunctions.twobumps(xt)
 
-    ind = [10, 45, 100, 130, 160]
-    xi = xt[ind]
-    zi = zt[ind]
+    ni = 5
+    xi = gp.misc.designs.ldrandunif(dim, ni, box)
+    zi = gp.misc.testfunctions.twobumps(xi)
 
+    
     return xt, zt, xi, zi
 
 
@@ -41,9 +42,9 @@ def constant_mean(x, param):
     return np.ones((x.shape[0], 1))
 
 
-def kernel(x, y, covparam):
-    p = 1
-    return gp.kernel.maternp_covariance(x, y, p, covparam)
+def kernel(x, y, covparam, pairwise=False):
+    p = 3
+    return gp.kernel.maternp_covariance(x, y, p, covparam, pairwise)
 
 
 meanparam = None
@@ -66,9 +67,9 @@ gp.kernel.print_sigma_rho(covparam_reml)
 
 # -- plot likelihood profile
 
-n = 50
-sigma = np.logspace(-0.6, 1, n)
-rho = np.logspace(-1.25, 0.5, n)
+n = 200
+sigma = np.logspace(-0.9, 1.0, n)
+rho = np.logspace(-1.4, 0.4, n)
 
 sigma_mesh, rho_mesh = np.meshgrid(sigma, rho)
 
@@ -78,10 +79,17 @@ for i in range(n):
         covparam = np.array(
             [math.log(sigma_mesh[i, j]**2), math.log(1 / rho_mesh[i, j])])
         nlrl_values[i, j] = nlrl(covparam)
+        if np.isnan(nlrl_values[i, j]):
+            nlrl_values[i, j] = 0
 
-plt.contourf(np.log10(sigma_mesh), np.log10(rho_mesh), np.log10(nlrl_values))
-plt.plot(np.log10(np.exp(covparam_reml[0])), -
-         np.log10(np.exp(covparam_reml[1])), 'ro')
+plt.contourf(np.log10(sigma_mesh), np.log10(rho_mesh),
+             np.log10(nlrl_values - np.min(nlrl_values)))
+plt.plot(0.5*np.log10(np.exp(covparam_reml[0])),
+         - np.log10(np.exp(covparam_reml[1])),
+         'ro')
+plt.plot(0.5*np.log10(np.exp(covparam0[0])),
+         - np.log10(np.exp(covparam0[1])),
+         'bo')
 plt.xlabel('sigma (log10)')
 plt.ylabel('rho (log10)')
 plt.title('log10 of the negative log restricted likelihood')
@@ -95,10 +103,10 @@ plt.show()
 zpv = np.maximum(zpv, 0)  # zeroes negative variances
 
 fig = gp.misc.plotutils.Figure(isinteractive=True)
-fig.plot(xt, zt, 'C2', linewidth=0.5)
-fig.plot(xi, zi, 'rs')
-fig.plotgp(xt, zpm, zpv)
-fig.ax.set_xlabel('$x$')
-fig.ax.set_ylabel('$z$')
-fig.ax.set_title('Posterior GP with parameters selected by ReML')
+fig.plot(xt, zt, 'k', linewidth=0.5)
+fig.plotdata(xi, zi)
+fig.plotgp(xt, zpm, zpv, colorscheme='simple')
+fig.xlabel('$x$')
+fig.ylabel('$z$')
+fig.title('Posterior GP with parameters selected by ReML')
 fig.show()

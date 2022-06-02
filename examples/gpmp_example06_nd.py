@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import gpmp as gp
 
 # -- choose test case
-testcase = 1
+testcase = 2
 if testcase == 1:
     f = gp.misc.testfunctions.hartmann4
     dim = 4
@@ -31,16 +31,16 @@ if testcase == 1:
     xi = gp.misc.designs.ldrandunif(dim, ni, box)
     nt = 1000
     xt = gp.misc.designs.ldrandunif(dim, nt, box)
-    
+
 if testcase == 2:
     f = gp.misc.testfunctions.hartmann6
     dim = 6
     box = [[0] * 6, [1.0] * 6]
-    ni = 600
+    ni = 500
     xi = gp.misc.designs.ldrandunif(dim, ni, box)
     nt = 1000
     xt = gp.misc.designs.ldrandunif(dim, nt, box)
-    
+
 elif testcase == 3:
     f = gp.misc.testfunctions.borehole
     dim = 8
@@ -72,9 +72,9 @@ def constant_mean(x, param):
     return np.ones((x.shape[0], 1))
 
 
-def kernel(x, y, covparam):
+def kernel(x, y, covparam, pairwise=False):
     p = 10
-    return gp.kernel.maternp_covariance(x, y, p, covparam)
+    return gp.kernel.maternp_covariance(x, y, p, covparam, pairwise)
 
 
 model = gp.core.Model(constant_mean, kernel)
