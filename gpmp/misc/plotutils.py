@@ -133,10 +133,26 @@ class Figure:
 
 
 def crosssections(model, xi, zi, box, ind_i, ind_dim, nt=100):
-    '''Display "cross-section" predictions at points xi[ind_i] along
+    """Display "cross-section" predictions at points xi[ind_i] along
     dimensions specified in ind_dim
 
-    '''
+    Parameters
+    ----------
+    model : _type_
+        _description_
+    xi : _type_
+        _description_
+    zi : _type_
+        _description_
+    box : _type_
+        _description_
+    ind_i : _type_
+        _description_
+    ind_dim : _type_
+        _description_
+    nt : int, optional
+        _description_, by default 100
+    """
     box = np.array(box)
     num_crosssections = len(ind_i)
     num_dims = len(ind_dim)
@@ -162,7 +178,17 @@ def crosssections(model, xi, zi, box, ind_i, ind_dim, nt=100):
 
 
 def plot_loo(zi, zloom, zloov):
-    ''' LOO plot'''
+    """LOO plot
+
+    Parameters
+    ----------
+    zi : _type_
+        _description_
+    zloom : _type_
+        _description_
+    zloov : _type_
+        _description_
+    """
     fig = Figure()
 
     fig.ax.errorbar(zi, zloom, 1.96 * np.sqrt(zloov), fmt='ko', ls='None')
