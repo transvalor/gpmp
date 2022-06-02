@@ -1,3 +1,6 @@
+.. image:: images/logo.png
+  :width: 300
+
 ========================
 GPmp documentation
 ========================
@@ -10,8 +13,8 @@ customizable.
 For the purpose of simplicity, the gpmp does not check the validity of arguments. This is left to the responsibility of the user / calling
 code.
 
-GPmp implements :
------------------
+Implemented Methods
+===================
 
 *   GP interpolation and regression with unknown mean / intrisinc kriging
 
@@ -68,3 +71,4 @@ Content
     core
     kernel
     misc/index
+    examples/index
