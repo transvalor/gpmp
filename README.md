@@ -76,7 +76,7 @@ The html theme is taken from
 >pip install pydata_sphinx_theme
 
 In order to generate the intereactive html:
->cd ./doc
+>cd ./docs
 
 >make html
 
